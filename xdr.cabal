@@ -6,9 +6,9 @@ cabal-version:          >= 1.6
 build-type:             Simple
 
 author:                 James Cook <mokus@deepbondi.net>
-maintainer:             James Cook <mokus@deepbondi.net>
+maintainer:             Brendan Hay <brendanhay@soundcloud.com>
 license:                PublicDomain
-homepage:               https://github.com/mokus0/xdr
+homepage:               https://github.com/brendanhay/xdr
 
 category:               Serialization
 synopsis:               XDR (eXternal Data Representation)
@@ -17,16 +17,16 @@ description:            XDR (eXternal Data Representation) is a simple
                         encodings.  This library provides an implementation
                         of the data model and encoding/decoding functions, as
                         well as a parser and pretty-printer for the language.
-                        
-                        There is also a very rudimentary quasiquoter which 
-                        allows declaration of simple XDR formats inline in 
+
+                        There is also a very rudimentary quasiquoter which
+                        allows declaration of simple XDR formats inline in
                         Haskell code.  This feature will likely be expanded
                         later, but the current interface is simple enough
                         that any future work will be a proper extension of it.
 
 source-repository head
   type:                 git
-  location:             https://github.com/mokus0/xdr.git
+  location:             https://github.com/brendanhay/xdr.git
 
 Library
   hs-source-dirs:       src
@@ -43,12 +43,11 @@ Library
                         Language.XDR.Parser
                         Language.XDR.Pretty
                         Language.XDR.Syntax
-                        
-  build-depends:        base >= 3 && < 5, 
+
+  build-depends:        base >= 3 && < 5,
                         array,
-                        binary, 
+                        binary,
                         bytestring,
-                        bytestring-class,
                         containers,
                         data-binary-ieee754,
                         monad-loops,

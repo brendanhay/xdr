@@ -4,12 +4,12 @@ import Control.Monad
 import Data.Binary.Get
 import Data.Binary.IEEE754
 import Data.Bits
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BL
-import Data.ByteString.Class
 import Data.Int
 import Data.List
 import Data.Word
+
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Lazy.Char8 as BL
 
 getVoid :: Get ()
 getVoid = return ()
@@ -45,32 +45,28 @@ getFloat = getFloat32be
 getDouble :: Get Double
 getDouble = getFloat64be
 
-getFixedOpaque :: LazyByteString bs => Word32 -> Get bs
+getFixedOpaque :: Word32 -> Get BL.ByteString
 getFixedOpaque n = do
     bs <- getLazyByteString (fromIntegral n)
-    
     case fromIntegral (n .&. 3) of
         0 -> return ()
         m -> skip (4-m)
-    
-    return (fromLazyByteString bs)
+    return bs
 
-getVariableOpaque :: LazyByteString bs => Maybe Word32 -> Get bs
+getVariableOpaque :: Maybe Word32 -> Get BL.ByteString
 getVariableOpaque mbLim = do
     n <- getWord32be
     case mbLim of
         Just lim | n > lim  -> fail "getVariableOpaque: encoded field has length larger than limit"
         _                   -> return ()
     bs <- getLazyByteString (fromIntegral n)
-    
     case fromIntegral (n .&. 3) of
         0 -> return ()
         m -> skip (4-m)
-    
-    return (fromLazyByteString bs)
+    return bs
 
 getString :: Maybe Word32 -> Get String
-getString = getVariableOpaque
+getString word = getVariableOpaque word >>= return . BL.unpack
 
 getFixedArray :: Get a -> Word32 -> Get [a]
 getFixedArray getItem n = sequence (genericReplicate n getItem)
@@ -81,7 +77,6 @@ getVariableArray getItem mbLim = do
     case mbLim of
         Just lim | n > lim  -> fail "getVariableArray: encoded array has count larger than limit"
         _                   -> return ()
-    
     sequence (genericReplicate n getItem)
 
 getStruct :: [Get a] -> Get [a]

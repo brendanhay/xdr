@@ -5,14 +5,14 @@ import Codec.Binary.XDR.Format as Fmt
 import Language.XDR as Syn
 
 import Control.Monad
-import Data.ByteString.Class
-import qualified Data.ByteString.Lazy.Char8 as BL
 import Data.Char
-import qualified Data.Map as M
 import Data.Maybe
 import Data.Monoid
 import Language.Haskell.TH
 import Text.PrettyPrint.HughesPJClass
+
+import qualified Data.ByteString.Lazy.Char8 as BL
+import qualified Data.Map                   as M
 
 -- WARNING!!!
 -- This is a big ugly ball of code.  Do not read if you value your sanity!
@@ -20,9 +20,9 @@ import Text.PrettyPrint.HughesPJClass
 -- do, come up with a better idea of what it _should_ do, and implement _that_
 -- from scratch.
 
-xdrToFmts :: LazyByteString s => s -> Q [Dec]
+xdrToFmts :: BL.ByteString -> Q [Dec]
 xdrToFmts src = do
-    parsed <- either fail return (parseXDR xdr (toLazyByteString src))
+    parsed <- either fail return (parseXDR xdr src)
     xdrToHs emptyEnv simpleTHEnv parsed
 
 data THEnv t = THEnv

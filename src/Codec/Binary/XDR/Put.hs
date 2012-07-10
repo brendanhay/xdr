@@ -3,11 +3,11 @@ module Codec.Binary.XDR.Put where
 import Data.Binary.Put
 import Data.Binary.IEEE754
 import Data.Bits
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BL
-import Data.ByteString.Class
 import Data.Int
 import Data.Word
+
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Lazy.Char8 as BL
 
 putVoid :: Put
 putVoid = return ()
@@ -41,39 +41,33 @@ putFloat = putFloat32be
 putDouble :: Double -> Put
 putDouble = putFloat64be
 
--- Using 'LazyByteString' class for a combination of 2 reasons:
--- 1. I want to use one of the classes, so that either input is acceptable
--- 2. Lazy is preferred because a no-copy conversion from strict to lazy is
---    possible but not the other way.
-putFixedOpaque :: LazyByteString bs => Word32 -> bs -> Put
+putFixedOpaque :: Word32 -> BL.ByteString -> Put
 putFixedOpaque n bs
     | toInteger len /= toInteger n
         = fail "putFixedOpaque: supplied bytestring has incorrect length"
     | otherwise = do
-        putLazyByteString lbs
+        putLazyByteString bs
         case fromIntegral len .&. 3 of
             0 -> return ()
             m -> putByteString (BS.replicate (4-m) 0)
     where
-        lbs = toLazyByteString bs
-        len = BL.length lbs
+      len = BL.length bs
 
-putVariableOpaque :: LazyByteString bs => Maybe Word32 -> bs -> Put
+putVariableOpaque :: Maybe Word32 -> BL.ByteString -> Put
 putVariableOpaque mbLen bs = case mbLen of
     Just n | toInteger len > toInteger n
         -> fail "putVariableOpaque: supplied bytestring is too long"
     _   -> do
         putUnsignedInt (fromIntegral len)
-        putLazyByteString lbs
+        putLazyByteString bs
         case fromIntegral len .&. 3 of
             0 -> return ()
             m -> putByteString (BS.replicate (4-m) 0)
-    where 
-        lbs = toLazyByteString bs
-        len = BL.length lbs
+    where
+      len = BL.length bs
 
 putString :: Maybe Word32 -> String -> Put
-putString = putVariableOpaque
+putString word = putVariableOpaque word . BL.pack
 
 putFixedArray :: (a -> Put) -> Word32 -> [a] -> Put
 putFixedArray putItem n items = loop n items

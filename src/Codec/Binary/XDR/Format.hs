@@ -6,12 +6,12 @@ module Codec.Binary.XDR.Format
 
 import Codec.Binary.XDR.Get
 import Codec.Binary.XDR.Put
-
 import Control.Monad
 import Data.Binary
-import Data.ByteString.Class
 import Data.Int
 import Data.Word
+
+import qualified Data.ByteString.Lazy as BL
 
 data Fmt a where
     Void    :: Fmt ()
@@ -23,8 +23,8 @@ data Fmt a where
     UHyper  :: Fmt Word64
     Float   :: Fmt Float
     Double  :: Fmt Double
-    OpaqueF :: LazyByteString bs => Word32 -> Fmt bs
-    OpaqueV :: LazyByteString bs => Maybe Word32 -> Fmt bs
+    OpaqueF :: Word32 -> Fmt BL.ByteString
+    OpaqueV :: Maybe Word32 -> Fmt BL.ByteString
     String  :: Maybe Word32 -> Fmt String
     ArrayF  :: Fmt a -> Word32 -> Fmt [a]
     ArrayV  :: Fmt a -> Maybe Word32 -> Fmt [a]
